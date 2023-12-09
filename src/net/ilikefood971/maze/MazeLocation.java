@@ -2,6 +2,7 @@ package net.ilikefood971.maze;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import static net.ilikefood971.maze.Main.getByCoords;
 
@@ -11,6 +12,7 @@ public class MazeLocation {
     private boolean visited = false;
     private final boolean wall;
     private boolean wallExists = true;
+    private boolean isSolution = false;
     
     public MazeLocation(MazeRow row, int x, boolean wall) {
         this.y = Main.maze.indexOf(row);
@@ -18,18 +20,22 @@ public class MazeLocation {
         this.wall = wall;
     }
     
-    public void run() throws InterruptedException {
-        while (true) {
-            this.markVisited();
+    public void run() {
+        Stack<MazeLocation> stack = new Stack<>();
+        stack.push(this);
+        
+        while (!stack.isEmpty()) {
+            MazeLocation current = stack.pop();
+            current.markVisited();
             
-            MazeLocation next = this.findRandomValid();
-            if (next == null) {
-                break;
+            MazeLocation next = current.findRandomValid();
+            if (next != null) {
+                MazeLocation wall = getByCoords(((current.x - next.x) / -2) + current.x, ((current.y - next.y) / -2) + current.y);
+                wall.removeWall();
+                
+                stack.push(current); // Push current location back onto the stack
+                stack.push(next);    // Push the next location onto the stack
             }
-            MazeLocation wall = getByCoords(((this.x - next.x) / -2) + this.x, ((this.y - next.y) / -2) + this.y);
-            wall.removeWall();
-            
-            next.run();
         }
     }
     
@@ -53,6 +59,10 @@ public class MazeLocation {
     }
     public boolean exists() {
         return wallExists;
+    }
+    
+    public boolean isSolution() {
+        return isSolution;
     }
     
     public MazeLocation findRandomValid() {

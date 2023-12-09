@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Main extends JFrame {
-    public static final int ROWS = 1000;
-    public static int COLUMNS = 1000;
+    public static final int ROWS = 1080;
+    public static int COLUMNS = 3840;
     public static ArrayList<MazeRow> maze;
     public static MazeLocation start;
     public static final Random RANDOM = new Random();
@@ -19,12 +19,15 @@ public class Main extends JFrame {
     public static void main(String[] args) throws InterruptedException {
         COLUMNS -= 2;
         END_X = COLUMNS;
-        
-        buildMaze();
-        
-        new Main().printMaze();
+        Main main = new Main();
+        try {
+            buildMaze();
+        } catch (StackOverflowError error) {
+            System.out.println(error);
+        }
+        main.printMaze();
     }
-    public static void buildMaze() throws InterruptedException {
+    public static void buildMaze() {
         maze = new ArrayList<>();
         
         for (int i = 0; i < ROWS - 2; i++) {
@@ -55,11 +58,11 @@ public class Main extends JFrame {
         if (x < 0 || x >= maze.get(0).getLocations().size() || y < 0 || y >= maze.size()) return null;
         return maze.get(y).get(x);
     }
-    
     public void printMaze() {
         
         setTitle("Maze Generator");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setUndecorated(true);
         
         
         MazePanel mazePanel = new MazePanel();
@@ -70,8 +73,7 @@ public class Main extends JFrame {
         button.addActionListener(e -> {
             try {
                 buildMaze();
-            } catch (InterruptedException ex) {
-                throw new RuntimeException(ex);
+            } catch (StackOverflowError ignored) {
             }
             mazePanel.repaint();
         });
@@ -80,7 +82,7 @@ public class Main extends JFrame {
         
         mazePanel.repaint();
         
-        getContentPane().setPreferredSize(new Dimension((CELL_SIZE + 1) * COLUMNS, (CELL_SIZE) * ROWS));
+        getContentPane().setPreferredSize(new Dimension(CELL_SIZE * COLUMNS + 5, CELL_SIZE * ROWS + 20));
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
@@ -90,11 +92,6 @@ public class Main extends JFrame {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            
-            
-            
-            
-            
             
             // Drawing logic
             for (int y = 0; y < maze.size(); y++) {
